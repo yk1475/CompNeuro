@@ -34,21 +34,30 @@ def q1a():
 
 
 # Q1b
-def q1b():
-    c = 0.1
-    m = 1
-    k = 1
+def eulerOscillator(
+    c = 0.1,
+    m = 1,
+    k = 1,
+    tMax = 100,
+    delta = 0.01,
+):
 
-    tMax = 100
-    delta = 0.01
     ts = np.arange(0, tMax+delta, delta)
-    ys = np.ones(len(ts))
-    ps = np.zeros(len(ts))
-    for i in range(len(ps)-1):
-        ps[i+1] = ps[i] + delta * ((-c * ps[i] - k * ys[i])/m)
-        ys[i+1] = ys[i] + delta * ps[i]
+    # state = [(y,p)]
+    state = np.zeros((2, len(ts)))
+    state[0,0] = 1
+    state[1,0] = 0
+    for i in range(len(ts)-1):
+        y, p = state[:,i]
+        state[1, i+1] = p + delta * ((-c * p - k * y)/m)
+        state[0, i+1] = y + delta * p
 
-    plt.plot(ts, ys, color="blue", marker="o", markersize=0.1)
+    return ts, state
+
+def q1b():
+    ts, state = eulerOscillator()
+
+    plt.plot(ts, state[0,:], color="blue", marker="o", markersize=0.1)
     plt.grid(True)
     plt.show()
 
@@ -67,11 +76,10 @@ def zPrime(z):
         (-c*p - k*y)/m
     ])
 
-def q1c():
-
-    tMax = 100
-    delta = 0.5
-
+def rkOscillator(
+        tMax = 100,
+        delta = 0.5
+):    
     ts = np.arange(0, tMax+delta, delta)
     # [(y, p)]
     zs = np.zeros((2, len(ts)))
@@ -88,8 +96,13 @@ def q1c():
 
         zs[:, i+1] = z + delta * 1/6 * (k1 + 2 * k2 + 2 * k3 + k4)
 
+    return ts, zs
 
-    plt.plot(ts, zs[0, :], color="blue", marker="o", markersize=0.1)
+
+def q1c():
+    ts, zs = rkOscillator()
+
+    plt.plot(ts, zs[0:,], color="blue", marker="o", markersize=0.1)
     plt.grid(True)
     plt.show()
 

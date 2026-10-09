@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from Question1 import eulerOscillator, rkOscillator
 
 # Earth based pendulum assumption
 l = m = 1
@@ -144,4 +145,36 @@ def q2a():
     ts, thetas, _ = rungeKutta()
     animate(ts, thetas)
 
-q2a()
+# PART b
+
+def q2b():
+    delta = 0.01
+    tMax = 100
+    ts, eulerState  = eulerOscillator(tMax = tMax, delta = delta)
+    ts, rkState = rkOscillator(tMax = tMax, delta = delta)
+
+    maes = np.mean(np.abs(rkState - eulerState), axis=0)
+
+    plt.plot(ts, maes, color="blue", marker="o", markersize=0.1)
+    plt.grid(True)
+    plt.show()
+
+
+# PART C
+def q2c():
+    deltaT=0.001
+    tMax=5
+
+    ts, thetas, ps = euler(deltaT=deltaT, tMax=tMax)
+    eulerState = np.concatenate((thetas, ps), axis=0)
+
+    _, thetas, ps = rungeKutta(deltaT=deltaT, tMax=tMax)
+    rkState = np.concatenate((thetas, ps), axis=0)
+
+    maes = np.mean(np.abs(rkState - eulerState), axis=0)
+    
+    plt.plot(ts, maes, color="blue", marker="o", markersize=0.1)
+    plt.grid(True)
+    plt.show()
+
+q2c()
