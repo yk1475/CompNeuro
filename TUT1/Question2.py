@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from Question1 import eulerOscillator, rkOscillator
+from TUT1.Question1 import eulerOscillator, rkOscillator
 
 # Earth based pendulum assumption
 l = m = 1
