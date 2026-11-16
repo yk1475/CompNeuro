@@ -132,6 +132,7 @@ def plot_connectivity(Ws, ps):
         ax.set_xlabel("Target neuron")
         ax.set_ylabel("Source neuron")
     fig.tight_layout()
+    fig.savefig(f"/Users/yeonakim/Downloads/connectivity.pdf")
     plt.show()
 
 
@@ -150,23 +151,29 @@ def firing_rates(times, neurons, n=excitatory_nodes, N=N, T=T, window=50, step=2
 
 def plot_raster_and_firing_rate(all_spikes, ps, N_ex=excitatory_nodes*N):
     for (times, spiked_neurons), p in zip(all_spikes, ps):
-        fig, axes = plt.subplots(2, 1, figsize=(11, 7))
+        fig, axes = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
         fig.suptitle(f"p = {p}")
 
         # first graph: raster plot
         raster_ax = axes[0]
-        raster_ax.scatter(times, spiked_neurons, s=2, marker='|')
+        inhib = spiked_neurons >= 800 
+        raster_ax.scatter(times[~inhib], spiked_neurons[~inhib], s=2, marker='|', color="tab:blue", label="Excitatory")
+        raster_ax.scatter(times[inhib], spiked_neurons[inhib], s=2, marker='|', color="tab:red", label="Inhibitory")
         raster_ax.set_ylabel("Neuron")
+        raster_ax.legend(fontsize=7, markerscale=4, ncol=2,
+                 loc="lower right", bbox_to_anchor=(1, 1))
 
         # second graph: firing rate plot
         fr_ax = axes[1]
         starts, rates = firing_rates(times, spiked_neurons)
         for module in range(N):
-            fr_ax.plot(starts, rates[module])
+            fr_ax.plot(starts, rates[module], label=f"module {module+1}")
         fr_ax.set_xlabel("Time (ms)")
         fr_ax.set_ylabel("Spikes / ms")
         fr_ax.set_xlim(0, 1000)
+        fr_ax.legend(fontsize=7)
 
+        fig.savefig(f"/Users/yeonakim/Downloads/p{str(p).replace('.', '_')}.pdf")
         plt.show()
 
 
