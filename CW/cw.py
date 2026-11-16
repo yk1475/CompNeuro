@@ -150,13 +150,12 @@ def firing_rates(times, neurons, n=excitatory_nodes, N=N, T=T, window=50, step=2
 
 def plot_raster_and_firing_rate(all_spikes, ps, N_ex=excitatory_nodes*N):
     for (times, spiked_neurons), p in zip(all_spikes, ps):
-        fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+        fig, axes = plt.subplots(2, 1, figsize=(11, 7))
         fig.suptitle(f"p = {p}")
 
         # first graph: raster plot
         raster_ax = axes[0]
-        cond = spiked_neurons < N_ex
-        raster_ax.scatter(times[cond], spiked_neurons[cond], s=2, marker='|')
+        raster_ax.scatter(times, spiked_neurons, s=2, marker='|')
         raster_ax.set_ylabel("Neuron")
 
         # second graph: firing rate plot
