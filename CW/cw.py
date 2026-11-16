@@ -1,6 +1,5 @@
 from iznetwork import IzNetwork
 import numpy as np
-import random
 import matplotlib.pyplot as plt
 
 # probabilities
@@ -21,7 +20,6 @@ I = 15
 rng = np.random.default_rng() # random gen
 
 def EE(p, n=excitatory_nodes, m=m, N=N):
-    # A[i, j] = True means edge i -> j
     A = np.zeros((n*N,n*N))
 
     for c in range(N):
@@ -29,8 +27,8 @@ def EE(p, n=excitatory_nodes, m=m, N=N):
         edge_count = 0
         # Randomly link nodes
         while edge_count < m:
-            i = random.randrange(start, start+n)
-            j = random.randrange(start, start+n)
+            i = rng.integers(start, start+n)
+            j = rng.integers(start, start+n)
             if i != j and not A[i, j]:
                 A[i, j] = 17
                 # A[j, i] = True
@@ -41,10 +39,10 @@ def EE(p, n=excitatory_nodes, m=m, N=N):
     src, tgt = np.nonzero(A)
 
     for i, j in zip(src, tgt):
-        if random.random() < p:
+        if rng.random() < p:
 
             while True:
-                k = random.randrange(len(A))
+                k = rng.integers(len(A))
                 # no self loop or already existing edge
                 if k != i and not A[i, k]:
                     break
@@ -89,23 +87,23 @@ def neuron_params(exc=excitatory_nodes, inh=inhibitory_nodes, N=N):
 
 def build_network(p, exc=excitatory_nodes, inh=inhibitory_nodes, N=N):
     N_ex = exc * N
-    N = N_ex + inh
+    N_total = N_ex + inh
 
     # Weights
-    W = np.zeros((N, N))
+    W = np.zeros((N_total, N_total))
     W[:N_ex, :N_ex] = EE(p)
     W[:N_ex, N_ex:] = EI()
     W[N_ex:, :N_ex] = IE()
     W[N_ex:, N_ex:] = II()
 
     # Delay: E->E 1-20ms and rest 1ms
-    D = np.ones((N,N), dtype=int)
-    D[:N_ex, :N_ex] = rng.uniform(1, 21, size=(N_ex, N_ex))
+    D = np.ones((N_total,N_total), dtype=int)
+    D[:N_ex, :N_ex] = rng.integers(1, 21, size=(N_ex, N_ex))
 
     # parameters for exitatory, inhibitory
     a,b,c,d = neuron_params()
 
-    net = IzNetwork(N, Dmax=20)
+    net = IzNetwork(N_total, Dmax=20)
     net.setWeights(W)
     net.setDelays(D)
     net.setParameters(a,b,c,d)
@@ -156,7 +154,7 @@ def plot_raster_and_firing_rate(all_spikes, ps, N_ex=excitatory_nodes*N):
 
         # first graph: raster plot
         raster_ax = axes[0]
-        inhib = spiked_neurons >= 800 
+        inhib = spiked_neurons >= N_ex 
         raster_ax.scatter(times[~inhib], spiked_neurons[~inhib], s=2, marker='|', color="tab:blue", label="Excitatory")
         raster_ax.scatter(times[inhib], spiked_neurons[inhib], s=2, marker='|', color="tab:red", label="Inhibitory")
         raster_ax.set_ylabel("Neuron")
