@@ -132,19 +132,8 @@ def plot_connectivity(Ws, ps):
         ax.set_xlabel("Target neuron")
         ax.set_ylabel("Source neuron")
     fig.tight_layout()
-    return fig
+    plt.show()
 
-def raster_plot_spikes(all_spikes, ps, N_ex=excitatory_nodes*N):
-    fig, axes = plt.subplots(6, 1, figsize=(12, 12))
-    for ax, (times, spiked_neurons), p in zip(axes.flat, all_spikes, ps):
-        only_excit = spiked_neurons < N_ex
-        ax.scatter(times[only_excit], spiked_neurons[only_excit], s=2, marker='|')
-        ax.set_title(f"p = {p}")
-        ax.set_ylabel("Neuron")
-        ax.set_ylim(0, N_ex)
-        ax.set_xlabel("Time (ms)")
-    fig.tight_layout()
-    return fig
 
 def firing_rates(times, neurons, n=excitatory_nodes, N=N, T=T, window=50, step=20):
     starts = np.arange(0, T - window + 1, step) # 0, 20, ... -> 48 windows
@@ -158,19 +147,29 @@ def firing_rates(times, neurons, n=excitatory_nodes, N=N, T=T, window=50, step=2
             rates[c, k] = in_window.sum() / window # spikes per ms
     return starts, rates
 
-def plot_firing_rates(all_spikes, ps):
-    fig, axes = plt.subplots(6, 1, figsize=(12, 12))
-    for ax, (times, spiked_neurons), p in zip(axes.flat, all_spikes, ps):
+
+def plot_raster_and_firing_rate(all_spikes, ps, N_ex=excitatory_nodes*N):
+    for (times, spiked_neurons), p in zip(all_spikes, ps):
+        fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+        fig.suptitle(f"p = {p}")
+
+        # first graph: raster plot
+        raster_ax = axes[0]
+        cond = spiked_neurons < N_ex
+        raster_ax.scatter(times[cond], spiked_neurons[cond], s=2, marker='|')
+        raster_ax.set_ylabel("Neuron")
+
+        # second graph: firing rate plot
+        fr_ax = axes[1]
         starts, rates = firing_rates(times, spiked_neurons)
-        for c in range(N):
-            ax.plot(starts, rates[c], label=f"Module {c + 1}")
-        ax.set_title(f"p = {p}")
-        ax.set_xlabel("Time (ms)")
-        ax.set_ylabel("Spikes / ms")
-        ax.set_xlim(0, 1000)
-    axes.flat[0].legend(fontsize=7)
-    fig.tight_layout()
-    return fig
+        for module in range(N):
+            fr_ax.plot(starts, rates[module])
+        fr_ax.set_xlabel("Time (ms)")
+        fr_ax.set_ylabel("Spikes / ms")
+        fr_ax.set_xlim(0, 1000)
+
+        plt.show()
+
 
 def main():
     nets, Ws = [], []
@@ -180,14 +179,9 @@ def main():
         Ws.append(W)
 
     plot_connectivity(Ws, ps)
-    plt.show()
 
     all_spikes = [simulate(net) for net in nets]
-    raster_plot_spikes(all_spikes, ps)
-    plt.show()
-
-    plot_firing_rates(all_spikes, ps)
-    plt.show()
+    plot_raster_and_firing_rate(all_spikes, ps)
 
 
 main()
